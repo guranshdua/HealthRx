@@ -1,0 +1,115 @@
+<!doctype HTML>
+<html>
+    <head>
+        <title>HealthRx Round 1</title>
+        <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap">
+        </script>
+
+    </head>
+    <body>
+        <!--The Start of The Body of the page-->
+        <div id="map" style="height:80vh; width:100%; background-color: grey;">
+        </div>
+        <br>
+        <!--Division for Button and Text Output-->
+        <div style="align-content: center; width: 100%; text-align: center;">
+            <button onClick="flyRafale()">Deliver Rafale</button> 
+            <br>
+            <h1 id="result"></h1>
+        </div>
+        <script>
+            //Variables required to initialise map
+            let map;
+            let delivered=0;
+            let paris={lat: 48.8566, lng: 2.3522};
+            let ambala={lat: 30.3752, lng: 76.7821};
+            let fPath=[
+                paris,
+                ambala
+            ] ;
+            let activeMarkers=[];
+            //Initialise the Map
+            function initMap() 
+            {
+                 map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 38.5012, lng: 43.3730 },
+                    zoom: 4
+                });
+                var markerParis=new google.maps.Marker({position:paris, map: map});
+                activeMarkers.push(markerParis);
+                var markerAmbala=new google.maps.Marker({position:ambala, map: map});
+                activeMarkers.push(markerAmbala);
+                let rafalePath = new google.maps.Polyline({
+                    path: fPath,
+                    strokeOpacity: 0.3,
+                    strokeWeight: 1,
+                })
+                rafalePath.setMap(map);
+                
+                
+            }
+            //Function for Rafale Delivery Animation
+            function flyRafale() 
+            {
+                //Color Array for Aircraft
+                let colors=["#a3b467", "#32CD32",  "#ff0000", "#00FFFF", "#FFFF00"]
+                //The Flight Path
+                let flyPath=new google.maps.Polyline({
+                path: fPath,
+                strokeOpacity: 1.0,
+                strokeColor: colors[delivered],
+                icons: [
+                    {
+                        icon: {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            scale: 8,
+                            strokeColor:colors[delivered]
+                        },
+                        offset: "100%"
+                    }
+                    ]
+                })
+                
+                delivered++;
+                if(delivered<=5)
+                {
+                    //Marker Animation
+                    activeMarkers[0].setMap(null);
+                    activeMarkers[1].setMap(null);                    
+                    var markerAmbala=new google.maps.Marker({position:ambala,animation: google.maps.Animation.BOUNCE,
+                     map: map});
+                    activeMarkers[1]=markerAmbala;
+                    var markerParis=new google.maps.Marker({position:paris,animation: google.maps.Animation.BOUNCE
+                    , map: map});
+                    activeMarkers[0]=markerParis;
+
+                    flyPath.setMap(map);
+
+                    //Count to calculate aircraft position
+                    let count = 0;                    
+                    window.setInterval(() => {
+                        count = (count + 1);
+                        const icons = flyPath.get("icons");
+                        icons[0].offset = count / 2 + "%";
+                        flyPath.set("icons", icons);
+                    }, 20);
+                    //Stop Animation
+                    window.setTimeout(()=>{
+                        markerAmbala.setAnimation(null);
+                        markerParis.setAnimation(null);
+                    }, 1000);
+                        
+                    if(delivered==5)
+                    {
+                        document.getElementById("result").innerHTML="Rafale successfully delivered to India";
+                    }
+                }
+                else
+                {
+                    document.getElementById("result").innerHTML="Rafale successfully delivered to India";
+                }                
+            }
+        </script>
+    </body>
+</html>
